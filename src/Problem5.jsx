@@ -1,5 +1,4 @@
-import { useEffect } from "react";
-import { useFarmData } from "./mockData";
+import Summaries from "./components/summaries/summaries";
 
 /**
  * Problem 5
@@ -20,27 +19,12 @@ import { useFarmData } from "./mockData";
  * 4. Be prepared to discuss your approach.
  */
 export default function Problem() {
-  const [farmData, setFarmData]  = useFarmData();
-
-  useEffect(()=>{
-
-    setFarmData()
-  },[])
+  
 
   // Modify or split this into multiple components if desired
   return (
-    <div className="p-4">
-      <h2 className="text-xl font-bold mb-4">Problem 5</h2>
-      <p className="mb-4">{/* Example: Summaries or introductions here */}</p>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Render the data in the layout of your choice */}
-
-
-        <table>
-
-        </table>
-      </div>
+    <div>
+      <Summaries/>
     </div>
   );
 }
