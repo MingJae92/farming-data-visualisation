@@ -31,5 +31,11 @@ export default function Problem() {
 
 //Variety, which types? Filter by farm
 //Button filtering
-//Display data:TAble or graph
+//Display data:Table or graph
 //Button: Filter by total yields, variety, 
+
+//Total up yield
+//Total up yeilds by variety
+//Implement table to show all the results
+
+

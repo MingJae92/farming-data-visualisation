@@ -119,19 +119,32 @@ const mockData = [
  * @returns {Object} An object containing the farm data, a function to cancel the request, and a boolean indicating if the data is loading
  */
 export const useFarmData = () => {
-  let timeoutRef = useRef(undefined);
-
-  const [resolved, setResolved] = useState(undefined);
+  const timeoutRef = useRef(null);
+  const [data, setData] = useState([]);
+  const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    timeoutRef.current = setTimeout(() => {
-      setResolved(mockData);
-    }, 1000);
+    try {
+      timeoutRef.current = setTimeout(() => {
+        setData(mockData);
+        setIsLoading(false);
+      }, 1000);
+    } catch (err) {
+      setError("Failed to fetch farm data");
+      setIsLoading(false);
+    }
+
+    return () => clearTimeout(timeoutRef.current);
   }, []);
 
   return {
-    data: resolved,
-    cancelRequest: () => clearTimeout(timeoutRef.current),
-    isLoading: !resolved,
+    data,
+    error,
+    cancelRequest: () => {
+      clearTimeout(timeoutRef.current);
+      setIsLoading(false);
+    },
+    isLoading,
   };
 };
