@@ -1,9 +1,41 @@
+import React, { useState } from "react";
 import { useFarmData } from "../../mockData";
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography } from "@mui/material";
-import { StyledContainer, StyledTitle, StyledSummarySection, StyledTableContainer, StyledTableCell } from "../Styles/Styles";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Typography,
+} from "@mui/material";
+import {
+  StyledContainer,
+  StyledTitle,
+  StyledSummarySection,
+  StyledTableContainer,
+  StyledTableCell,
+} from "../Styles/Styles";
+import Searchbar from "../Searchbar/Searchbar";
 
 export default function Problem() {
   const { data, isLoading, error } = useFarmData();
+  const [query, setQuery] = useState("");
+
+  const filterFarmData = Array.isArray(data)
+    ? data.filter((row) =>
+        Object.values({
+          farm: row.farm || "",
+          variety: row.variety || "",
+          yield: row.yield || "",
+          date: row.date || "",
+          harvestedBy: row.harvestedBy || "",
+        }).some((value) =>
+          value.toString().toLowerCase().includes(query.toLowerCase())
+        )
+      )
+    : [];
 
   if (isLoading) {
     return (
@@ -34,18 +66,29 @@ export default function Problem() {
       </StyledTitle>
 
       <StyledSummarySection component="section">
-        <StyledTitle variant="h6" component="h2">Summary</StyledTitle>
+        <StyledTitle variant="h6" component="h2">
+          Summary
+        </StyledTitle>
         <Typography>Total Yield: {totalYield} kg</Typography>
         {Object.entries(yieldByVariety).map(([variety, yieldAmount]) => (
-          <Typography key={variety}>{variety}: {yieldAmount} kg</Typography>
+          <Typography key={variety}>
+            {variety}: {yieldAmount} kg
+          </Typography>
         ))}
       </StyledSummarySection>
+
+      {/* Pass query state to Searchbar */}
+      <Searchbar query={query} setQuery={setQuery} />
 
       <StyledTableContainer>
         <TableContainer component={Paper}>
           <Table aria-labelledby="table-caption">
-            <caption id="table-caption" style={{ textAlign: "left", padding: "8px" }}>
-              Detailed harvest data for different farms, including variety, yield, and harvesters.
+            <caption
+              id="table-caption"
+              style={{ textAlign: "left", padding: "8px" }}
+            >
+              Detailed harvest data for different farms, including variety,
+              yield, and harvesters.
             </caption>
             <TableHead>
               <TableRow>
@@ -58,16 +101,18 @@ export default function Problem() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {data.map(({ id, farm, variety, yield: yieldAmount, date, harvestedBy, category }) => (
-                <TableRow key={id}>
-                  <StyledTableCell>{farm}</StyledTableCell>
-                  <StyledTableCell>{variety}</StyledTableCell>
-                  <StyledTableCell>{yieldAmount}</StyledTableCell>
-                  <StyledTableCell>{date}</StyledTableCell>
-                  <StyledTableCell>{harvestedBy}</StyledTableCell>
-                  <StyledTableCell>{category}</StyledTableCell>
-                </TableRow>
-              ))}
+              {filterFarmData.map(
+                ({ id, farm, variety, yield: yieldAmount, date, harvestedBy, category }) => (
+                  <TableRow key={id}>
+                    <StyledTableCell>{farm}</StyledTableCell>
+                    <StyledTableCell>{variety}</StyledTableCell>
+                    <StyledTableCell>{yieldAmount}</StyledTableCell>
+                    <StyledTableCell>{date}</StyledTableCell>
+                    <StyledTableCell>{harvestedBy}</StyledTableCell>
+                    <StyledTableCell>{category}</StyledTableCell>
+                  </TableRow>
+                )
+              )}
             </TableBody>
           </Table>
         </TableContainer>

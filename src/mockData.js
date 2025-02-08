@@ -129,10 +129,12 @@ export const useFarmData = () => {
       timeoutRef.current = setTimeout(() => {
         setData(mockData);
         setIsLoading(false);
+        console.log(mockData)
       }, 1000);
     } catch (err) {
       setError("Failed to fetch farm data");
       setIsLoading(false);
+  
     }
 
     return () => clearTimeout(timeoutRef.current);
