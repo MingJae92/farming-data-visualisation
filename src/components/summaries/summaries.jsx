@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useFarmData } from "../../mockData";
+import { Typography } from "@mui/material";
 import {
   Table,
   TableBody,
@@ -8,7 +9,6 @@ import {
   TableHead,
   TableRow,
   Paper,
-  Typography,
 } from "@mui/material";
 import {
   StyledContainer,
@@ -23,10 +23,11 @@ export default function Summaries() {
   const { data, isLoading, error } = useFarmData();
   const [query, setQuery] = useState("");
 
-  // Filter data using regex
+  // Filter farm data using regex directly in the filter method
   const filterFarmData = Array.from(data).filter((row) => {
     const regex = new RegExp(query.replace(/[.*+?^=!:${}()|\[\]\/\\]/g, "\\$&"), "i");
 
+    // Check if any field in the row matches the regex
     return Object.values({
       farm: row.farm || "",
       variety: row.variety || "",
@@ -35,9 +36,6 @@ export default function Summaries() {
       harvestedBy: row.harvestedBy || "",
     }).some((value) => regex.test(value.toString()));
   });
-
-  // Check if no results are found
-  const noResultsFound = filterFarmData.length === 0;
 
   if (isLoading) {
     return (
@@ -87,7 +85,7 @@ export default function Summaries() {
 
       <Searchbar query={query} setQuery={setQuery} />
 
-      {noResultsFound ? (
+      {filterFarmData.length === 0 ? (
         <StyledTitle align="center" variant="h6" color="error">
           No search results found
         </StyledTitle>
@@ -140,5 +138,4 @@ export default function Summaries() {
       )}
     </StyledContainer>
   );
-
 }
