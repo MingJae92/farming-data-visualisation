@@ -25,7 +25,10 @@ export default function Summaries() {
 
   // Filter farm data using regex directly in the filter method
   const filterFarmData = Array.from(data).filter((row) => {
-    const regex = new RegExp(query.replace(/[.*+?^=!:${}()|\[\]\/\\]/g, "\\$&"), "i");
+    const regex = new RegExp(
+      query.replace(/[.*+?^=!:${}()|\[\]\/\\]/g, "\\$&"),
+      "i"
+    );
 
     // Check if any field in the row matches the regex
     return Object.values({
@@ -36,6 +39,12 @@ export default function Summaries() {
       harvestedBy: row.harvestedBy || "",
     }).some((value) => regex.test(value.toString()));
   });
+
+  const totalYield = filterFarmData.reduce((acc, curr) => acc + curr.yield, 0);
+  const yieldByVariety = filterFarmData.reduce((acc, curr) => {
+    acc[curr.variety] = (acc[curr.variety] || 0) + curr.yield;
+    return acc;
+  }, {});
 
   if (isLoading) {
     return (
@@ -59,12 +68,6 @@ export default function Summaries() {
     );
   }
 
-  const totalYield = data.reduce((acc, curr) => acc + curr.yield, 0);
-  const yieldByVariety = data.reduce((acc, curr) => {
-    acc[curr.variety] = (acc[curr.variety] || 0) + curr.yield;
-    return acc;
-  }, {});
-
   return (
     <StyledContainer component="section">
       <StyledTitle variant="h4" gutterBottom component="h1">
@@ -76,16 +79,19 @@ export default function Summaries() {
           Summary
         </StyledTitle>
         <Typography>Total Yield: {totalYield} kg</Typography>
-        {Object.entries(yieldByVariety).map(([variety, yieldAmount]) => (
-          <Typography key={variety}>
-            {variety}: {yieldAmount} kg
-          </Typography>
-        ))}
+        <Typography>
+          Total of each Yield:
+          {Object.entries(yieldByVariety).map(([variety, yieldAmount]) => (
+            <Typography key={variety}>
+              {variety}: {yieldAmount} kg
+            </Typography>
+          ))}
+        </Typography>
       </StyledSummarySection>
 
       <Searchbar query={query} setQuery={setQuery} />
 
-      {filterFarmData.length === 0 ? (
+      {filterFarmData.length === 0 && query ? (
         <StyledTitle align="center" variant="h6" color="error">
           No search results found
         </StyledTitle>
