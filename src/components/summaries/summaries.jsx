@@ -19,23 +19,25 @@ import {
 } from "../Styles/Styles";
 import Searchbar from "../Searchbar/Searchbar";
 
-export default function Problem() {
+export default function Summaries() {
   const { data, isLoading, error } = useFarmData();
   const [query, setQuery] = useState("");
 
-  const filterFarmData = Array.isArray(data)
-    ? data.filter((row) =>
-        Object.values({
-          farm: row.farm || "",
-          variety: row.variety || "",
-          yield: row.yield || "",
-          date: row.date || "",
-          harvestedBy: row.harvestedBy || "",
-        }).some((value) =>
-          value.toString().toLowerCase().includes(query.toLowerCase())
-        )
-      )
-    : [];
+  // Filter data using regex
+  const filterFarmData = Array.from(data).filter((row) => {
+    const regex = new RegExp(query.replace(/[.*+?^=!:${}()|\[\]\/\\]/g, "\\$&"), "i");
+
+    return Object.values({
+      farm: row.farm || "",
+      variety: row.variety || "",
+      yield: row.yield || "",
+      date: row.date || "",
+      harvestedBy: row.harvestedBy || "",
+    }).some((value) => regex.test(value.toString()));
+  });
+
+  // Check if no results are found
+  const noResultsFound = filterFarmData.length === 0;
 
   if (isLoading) {
     return (
@@ -47,7 +49,13 @@ export default function Problem() {
 
   if (error) {
     return (
-      <StyledTitle align="center" variant="h6" color="error" role="alert" sx={{ color: "red" }}>
+      <StyledTitle
+        align="center"
+        variant="h6"
+        color="error"
+        role="alert"
+        sx={{ color: "red" }}
+      >
         {error}
       </StyledTitle>
     );
@@ -77,46 +85,60 @@ export default function Problem() {
         ))}
       </StyledSummarySection>
 
-      {/* Pass query state to Searchbar */}
       <Searchbar query={query} setQuery={setQuery} />
 
-      <StyledTableContainer>
-        <TableContainer component={Paper}>
-          <Table aria-labelledby="table-caption">
-            <caption
-              id="table-caption"
-              style={{ textAlign: "left", padding: "8px" }}
-            >
-              Detailed harvest data for different farms, including variety,
-              yield, and harvesters.
-            </caption>
-            <TableHead>
-              <TableRow>
-                <StyledTableCell scope="col">Farm</StyledTableCell>
-                <StyledTableCell scope="col">Variety</StyledTableCell>
-                <StyledTableCell scope="col">Yield (kg)</StyledTableCell>
-                <StyledTableCell scope="col">Date</StyledTableCell>
-                <StyledTableCell scope="col">Harvested By</StyledTableCell>
-                <StyledTableCell scope="col">Category</StyledTableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {filterFarmData.map(
-                ({ id, farm, variety, yield: yieldAmount, date, harvestedBy, category }) => (
-                  <TableRow key={id}>
-                    <StyledTableCell>{farm}</StyledTableCell>
-                    <StyledTableCell>{variety}</StyledTableCell>
-                    <StyledTableCell>{yieldAmount}</StyledTableCell>
-                    <StyledTableCell>{date}</StyledTableCell>
-                    <StyledTableCell>{harvestedBy}</StyledTableCell>
-                    <StyledTableCell>{category}</StyledTableCell>
-                  </TableRow>
-                )
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </StyledTableContainer>
+      {noResultsFound ? (
+        <StyledTitle align="center" variant="h6" color="error">
+          No search results found
+        </StyledTitle>
+      ) : (
+        <StyledTableContainer>
+          <TableContainer component={Paper}>
+            <Table aria-labelledby="table-caption">
+              <caption
+                id="table-caption"
+                style={{ textAlign: "left", padding: "8px" }}
+              >
+                Detailed harvest data for different farms, including variety,
+                yield, and harvesters.
+              </caption>
+              <TableHead>
+                <TableRow>
+                  <StyledTableCell scope="col">Farm</StyledTableCell>
+                  <StyledTableCell scope="col">Variety</StyledTableCell>
+                  <StyledTableCell scope="col">Yield (kg)</StyledTableCell>
+                  <StyledTableCell scope="col">Date</StyledTableCell>
+                  <StyledTableCell scope="col">Harvested By</StyledTableCell>
+                  <StyledTableCell scope="col">Category</StyledTableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {filterFarmData.map(
+                  ({
+                    id,
+                    farm,
+                    variety,
+                    yield: yieldAmount,
+                    date,
+                    harvestedBy,
+                    category,
+                  }) => (
+                    <TableRow key={id}>
+                      <StyledTableCell>{farm}</StyledTableCell>
+                      <StyledTableCell>{variety}</StyledTableCell>
+                      <StyledTableCell>{yieldAmount}</StyledTableCell>
+                      <StyledTableCell>{date}</StyledTableCell>
+                      <StyledTableCell>{harvestedBy}</StyledTableCell>
+                      <StyledTableCell>{category}</StyledTableCell>
+                    </TableRow>
+                  )
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </StyledTableContainer>
+      )}
     </StyledContainer>
   );
+
 }
