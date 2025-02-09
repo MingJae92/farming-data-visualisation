@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useFarmData } from "../../mockData";
-import { Typography } from "@mui/material";
+import { Typography, Button, Box, CircularProgress } from "@mui/material";
 import {
   Table,
   TableBody,
@@ -23,14 +23,12 @@ export default function Summaries() {
   const { data, isLoading, error } = useFarmData();
   const [query, setQuery] = useState("");
 
-  // Filter farm data using regex directly in the filter method
   const filterFarmData = Array.from(data).filter((row) => {
     const regex = new RegExp(
       query.replace(/[.*+?^=!:${}()|\[\]\/\\]/g, "\\$&"),
       "i"
     );
 
-    // Check if any field in the row matches the regex
     return Object.values({
       farm: row.farm || "",
       variety: row.variety || "",
@@ -48,23 +46,26 @@ export default function Summaries() {
 
   if (isLoading) {
     return (
-      <StyledTitle align="center" variant="h6" role="status" aria-live="polite">
-        Loading data...
-      </StyledTitle>
+      <StyledContainer component="section">
+        <StyledTitle align="center" variant="h6" role="status" aria-live="polite">
+          <CircularProgress size={24} /> Loading farm data, please wait...
+        </StyledTitle>
+      </StyledContainer>
     );
   }
 
   if (error) {
     return (
-      <StyledTitle
-        align="center"
-        variant="h6"
-        color="error"
-        role="alert"
-        sx={{ color: "red" }}
-      >
-        {error}
-      </StyledTitle>
+      <StyledContainer component="section">
+        <StyledTitle align="center" variant="h6" color="error" role="alert">
+          {error}
+        </StyledTitle>
+        <Box textAlign="center" mt={2}>
+          <Button variant="contained" onClick={() => window.location.reload()}>
+            Retry
+          </Button>
+        </Box>
+      </StyledContainer>
     );
   }
 
@@ -79,17 +80,22 @@ export default function Summaries() {
           Summary
         </StyledTitle>
         <Typography>Total Yield: {totalYield} kg</Typography>
-        <Typography>
-          Total of each Yield:
+        <ul>
           {Object.entries(yieldByVariety).map(([variety, yieldAmount]) => (
-            <Typography key={variety}>
-              {variety}: {yieldAmount} kg
-            </Typography>
+            <li key={variety}>
+              <Typography>{variety}: {yieldAmount} kg</Typography>
+            </li>
           ))}
-        </Typography>
+        </ul>
       </StyledSummarySection>
 
-      <Searchbar query={query} setQuery={setQuery} />
+      <Searchbar query={query} setQuery={setQuery} aria-label="Search farm data" />
+
+      {query && (
+        <Typography variant="subtitle1" align="center" sx={{ mt: 1 }}>
+          {filterFarmData.length} result(s) found
+        </Typography>
+      )}
 
       {filterFarmData.length === 0 && query ? (
         <StyledTitle align="center" variant="h6" color="error">
@@ -98,47 +104,49 @@ export default function Summaries() {
       ) : (
         <StyledTableContainer>
           <TableContainer component={Paper}>
-            <Table aria-labelledby="table-caption">
-              <caption
-                id="table-caption"
-                style={{ textAlign: "left", padding: "8px" }}
-              >
-                Detailed harvest data for different farms, including variety,
-                yield, and harvesters.
-              </caption>
-              <TableHead>
-                <TableRow>
-                  <StyledTableCell scope="col">Farm</StyledTableCell>
-                  <StyledTableCell scope="col">Variety</StyledTableCell>
-                  <StyledTableCell scope="col">Yield (kg)</StyledTableCell>
-                  <StyledTableCell scope="col">Date</StyledTableCell>
-                  <StyledTableCell scope="col">Harvested By</StyledTableCell>
-                  <StyledTableCell scope="col">Category</StyledTableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {filterFarmData.map(
-                  ({
-                    id,
-                    farm,
-                    variety,
-                    yield: yieldAmount,
-                    date,
-                    harvestedBy,
-                    category,
-                  }) => (
-                    <TableRow key={id}>
-                      <StyledTableCell>{farm}</StyledTableCell>
-                      <StyledTableCell>{variety}</StyledTableCell>
-                      <StyledTableCell>{yieldAmount}</StyledTableCell>
-                      <StyledTableCell>{date}</StyledTableCell>
-                      <StyledTableCell>{harvestedBy}</StyledTableCell>
-                      <StyledTableCell>{category}</StyledTableCell>
-                    </TableRow>
-                  )
-                )}
-              </TableBody>
-            </Table>
+            <Box sx={{ overflowX: "auto" }}>
+              <Table aria-labelledby="table-caption" role="table">
+                <caption
+                  id="table-caption"
+                  style={{ textAlign: "left", padding: "8px" }}
+                >
+                  Detailed harvest data for different farms, including variety,
+                  yield, and harvesters.
+                </caption>
+                <TableHead>
+                  <TableRow role="row">
+                    <StyledTableCell scope="col" role="columnheader">Farm</StyledTableCell>
+                    <StyledTableCell scope="col" role="columnheader">Variety</StyledTableCell>
+                    <StyledTableCell scope="col" role="columnheader">Yield (kg)</StyledTableCell>
+                    <StyledTableCell scope="col" role="columnheader">Date</StyledTableCell>
+                    <StyledTableCell scope="col" role="columnheader">Harvested By</StyledTableCell>
+                    <StyledTableCell scope="col" role="columnheader">Category</StyledTableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {filterFarmData.map(
+                    ({
+                      id,
+                      farm,
+                      variety,
+                      yield: yieldAmount,
+                      date,
+                      harvestedBy,
+                      category,
+                    }) => (
+                      <TableRow key={id} role="row">
+                        <StyledTableCell role="cell">{farm}</StyledTableCell>
+                        <StyledTableCell role="cell">{variety}</StyledTableCell>
+                        <StyledTableCell role="cell">{yieldAmount}</StyledTableCell>
+                        <StyledTableCell role="cell">{date}</StyledTableCell>
+                        <StyledTableCell role="cell">{harvestedBy}</StyledTableCell>
+                        <StyledTableCell role="cell">{category}</StyledTableCell>
+                      </TableRow>
+                    )
+                  )}
+                </TableBody>
+              </Table>
+            </Box>
           </TableContainer>
         </StyledTableContainer>
       )}
