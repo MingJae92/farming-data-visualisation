@@ -1,7 +1,14 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { TextField } from "@mui/material";
+import debounce from "lodash.debounce";
 
 export default function Searchbar({ query, setQuery }) {
+  const debounceSetQuery = useCallback(
+    debounce((value) => {
+      setQuery(value);
+    }, 100),
+    [setQuery]
+  );
   return (
     <div>
       <TextField
@@ -9,7 +16,7 @@ export default function Searchbar({ query, setQuery }) {
         variant="outlined"
         fullWidth
         value={query}
-        onChange={(e) => setQuery(e.target.value)}
+        onChange={(e) => debounceSetQuery(e.target.value)}
         sx={{ mb: 2 }}
       />
     </div>
