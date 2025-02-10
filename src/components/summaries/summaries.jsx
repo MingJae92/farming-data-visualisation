@@ -23,20 +23,12 @@ export default function Summaries() {
   const { data, isLoading, error } = useFarmData();
   const [query, setQuery] = useState("");
 
-  const filterFarmData = Array.from(data).filter((row) => {
-    const regex = new RegExp(
-      query.replace(/[.*+?^=!:${}()|\[\]\/\\]/g, "\\$&"),
-      "i"
-    );
-
-    return Object.values({
-      farm: row.farm || "",
-      variety: row.variety || "",
-      yield: row.yield || "",
-      date: row.date || "",
-      harvestedBy: row.harvestedBy || "",
-    }).some((value) => regex.test(value.toString()));
-  });
+  // Optimized Filtering Logic
+  const filterFarmData = data.filter((row) =>
+    Object.values(row)
+      .filter((value) => typeof value === "string" || typeof value === "number") // Ensure valid values
+      .some((value) => value.toString().toLowerCase().includes(query.toLowerCase()))
+  );
 
   const totalYield = filterFarmData.reduce((acc, curr) => acc + curr.yield, 0);
   const yieldByVariety = filterFarmData.reduce((acc, curr) => {
@@ -76,14 +68,14 @@ export default function Summaries() {
       </StyledTitle>
 
       <StyledSummarySection component="section">
-        <StyledTitle variant="h6" component="h2">
-          Summary
-        </StyledTitle>
+        <StyledTitle variant="h6" component="h2">Summary</StyledTitle>
         <Typography>Total Yield: {totalYield} kg</Typography>
         <ul>
           {Object.entries(yieldByVariety).map(([variety, yieldAmount]) => (
             <li key={variety}>
-              <Typography>{variety}: {yieldAmount} kg</Typography>
+              <Typography>
+                {variety}: {yieldAmount} kg
+              </Typography>
             </li>
           ))}
         </ul>
@@ -106,12 +98,8 @@ export default function Summaries() {
           <TableContainer component={Paper}>
             <Box sx={{ overflowX: "auto" }}>
               <Table aria-labelledby="table-caption" role="table">
-                <caption
-                  id="table-caption"
-                  style={{ textAlign: "left", padding: "8px" }}
-                >
-                  Detailed harvest data for different farms, including variety,
-                  yield, and harvesters.
+                <caption id="table-caption" style={{ textAlign: "left", padding: "8px" }}>
+                  Detailed harvest data for different farms, including variety, yield, and harvesters.
                 </caption>
                 <TableHead>
                   <TableRow role="row">
@@ -124,26 +112,16 @@ export default function Summaries() {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {filterFarmData.map(
-                    ({
-                      id,
-                      farm,
-                      variety,
-                      yield: yieldAmount,
-                      date,
-                      harvestedBy,
-                      category,
-                    }) => (
-                      <TableRow key={id} role="row">
-                        <StyledTableCell role="cell">{farm}</StyledTableCell>
-                        <StyledTableCell role="cell">{variety}</StyledTableCell>
-                        <StyledTableCell role="cell">{yieldAmount}</StyledTableCell>
-                        <StyledTableCell role="cell">{date}</StyledTableCell>
-                        <StyledTableCell role="cell">{harvestedBy}</StyledTableCell>
-                        <StyledTableCell role="cell">{category}</StyledTableCell>
-                      </TableRow>
-                    )
-                  )}
+                  {filterFarmData.map(({ id, farm, variety, yield: yieldAmount, date, harvestedBy, category }) => (
+                    <TableRow key={id} role="row">
+                      <StyledTableCell role="cell">{farm}</StyledTableCell>
+                      <StyledTableCell role="cell">{variety}</StyledTableCell>
+                      <StyledTableCell role="cell">{yieldAmount}</StyledTableCell>
+                      <StyledTableCell role="cell">{date}</StyledTableCell>
+                      <StyledTableCell role="cell">{harvestedBy}</StyledTableCell>
+                      <StyledTableCell role="cell">{category}</StyledTableCell>
+                    </TableRow>
+                  ))}
                 </TableBody>
               </Table>
             </Box>
